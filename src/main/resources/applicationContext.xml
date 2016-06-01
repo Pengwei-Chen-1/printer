@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+			http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+			http://www.springframework.org/schema/mvc
+			http://www.springframework.org/schema/mvc/spring-mvc-4.1.xsd
+			http://www.springframework.org/schema/context
+			http://www.springframework.org/schema/context/spring-context-4.1.xsd">
+	<!-- 定义个缺省的控制适配器 -->
+	<bean
+		class="org.springframework.web.servlet.mvc.SimpleControllerHandlerAdapter" />
+	<!-- 获取配置文件 -->
+	<bean id="config"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>classpath:db-config.properties</value>
+			</list>
+		</property>
+	</bean>
+	<!-- 获取数据源 -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="driverClassName">
+			<value>${db.dirverClass}</value>
+		</property>
+		<property name="url">
+			<value>${db.url}</value>
+		</property>
+		<property name="username">
+			<value>${db.username}</value>
+		</property>
+		<property name="password">
+			<value>${db.password}</value>
+		</property>
+	</bean>
+	<bean class="com.cpw.util.SpringContextHolder" lazy-init="false" />
+	<context:component-scan base-package="test.SpringMVC"/>
+	<mvc:annotation-driven />
+	
+	<!-- URL到处理器的映射列表可以配置多个 mappings属性健值为URL程序文件地址，而值为处理器的Bean名字，URL程序文件地址可采用路径匹配的模式，如： 
+		com/mvc/t?st.jsp:匹配com/mvc/test.jsp、com/mvc/tast.jsp等 com/mvc /*.jsp ：匹配所有com/mvc/下带jsp后缀的URL 
+		com/mvc /**/test.jsp：匹配所有在com/mvc路径下或子孙路径下的test.jsp com/mvc /**/*.jsp：匹配所有com/mvc路径下或子孙路径下带.jsp后缀的URL 
+		cn/**/web/bla.jsp：匹配 cn/option/web/dog.jsp cn/option/test/web/dog.jsp cn/web/dog.jsp的请求 -->
+	<bean class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+		<property name="mappings">
+			<value>
+				user.do=userAction
+				printerAction.do=printerAction
+			</value>
+		</property>
+	</bean>
+
+	<!--定义视图通过internalResourceView来表示使用的是Servlet/jsp技术 -->
+	<bean id="viewResolver"
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="viewClass">
+			<value>org.springframework.web.servlet.view.InternalResourceView
+			</value>
+		</property>
+		<!--jsp存放的目录 -->
+		<property name="prefix">
+			<value>/jsp/</value>
+		</property>
+		<!--jsp文件的后缀 -->
+		<property name="suffix">
+			<value>.jsp</value>
+		</property>
+	</bean>
+	<bean id="userDao" class="com.cpw.springmvc.UserDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	<bean id="userInfoDao" class="com.cpw.dao.UserInfoDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	<bean id="printerDao" class="com.cpw.dao.PrinterDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	<bean id="taskDao" class="com.cpw.dao.TaskDao">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+	<!--测试控制器 -->
+	<bean id="userAction" class="com.cpw.springmvc.UserController">
+		<property name="userInfoDao">
+			<ref bean="userInfoDao" />
+		</property>
+		<property name="commandClass">
+			<value>com.cpw.springmvc.UserDao</value>
+		</property>
+		<property name="viewpage">
+			<value>userInfo</value>
+		</property>
+	</bean>
+	<!-- 打印机控制器 -->
+	<bean id="printerAction" class="com.cpw.controller.PrinterController">
+		<property name="commandClass">
+			<value>com.cpw.dao.PrinterDao</value>
+		</property>
+		<property name="printerDao">
+			<ref bean="printerDao"/>
+		</property>
+		<property name="viewpage">
+			<value>printer-index</value>
+		</property>
+		<property name="updatePage">
+			<value>printer-update</value>
+		</property>
+	</bean>
+</beans>
