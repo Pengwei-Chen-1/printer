@@ -55,7 +55,6 @@ public class PrinterController extends SimpleFormController {
 	@Override
 	protected ModelAndView onSubmit(HttpServletRequest request, HttpServletResponse response, Object command,
 			BindException errors) throws Exception {
-		System.out.println("test git");
 		List<PrinterVO> printerList = new ArrayList<PrinterVO>();
 		Map<String, Object> mp = new HashMap<String, Object>();
 		int printerId = 0;
